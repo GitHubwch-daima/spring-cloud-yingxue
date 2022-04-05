@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.azure.mapper.CategoryMapper">
+
+    <resultMap id="BaseResultMap" type="com.azure.entity.Category">
+        <id property="id" column="id" jdbcType="INTEGER"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="parentId" column="parent_id" jdbcType="INTEGER"/>
+        <result property="createdAt" column="created_at" jdbcType="TIMESTAMP"/>
+        <result property="updatedAt" column="updated_at" jdbcType="TIMESTAMP"/>
+        <result property="deletedAt" column="deleted_at" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <resultMap id="CategoriesMap" type="com.azure.entity.Category">
+        <id property="id" column="id" jdbcType="INTEGER"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <!--封装孩子-->
+        <collection property="children" javaType="list" ofType="com.azure.entity.Category">
+            <id property="id" column="cid" jdbcType="INTEGER"/>
+            <result property="name" column="cname" jdbcType="VARCHAR"/>
+            <result property="parentId" column="cParentId"/>
+        </collection>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id
+        ,name,parent_id,
+        created_at,updated_at,deleted_at
+    </sql>
+
+    <!--
+    新增所有列
+    useGeneratedKeys ：针对mysql数据库可用，使用数据库自动递增
+    keyProperty ：将本次插入数据库生成的id复制给参数对象的那个属性
+    -->
+    <insert id="saveCategoryDao" parameterType="com.azure.entity.Category" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO yingxue.category (`name`, parent_id, created_at, updated_at, deleted_at)
+        VALUES (#{name}, #{parentId}, #{createdAt}, #{updatedAt}, #{deletedAt})
+    </insert>
+
+    <select id="getCategoriesDao" resultMap="CategoriesMap">
+        SELECT c.id,
+               c.`name`,
+               c1.id        cid,
+               c1.`name`    cname,
+               c1.parent_id cParentId
+        FROM yingxue.`category` c
+                 LEFT JOIN yingxue.category c1 ON c.id = c1.parent_id
+        WHERE c.parent_id IS NULL
+    </select>
+</mapper>

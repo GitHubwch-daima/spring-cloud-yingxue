@@ -1,0 +1,57 @@
+#设置端口号
+server:
+  port: 8899
+spring:
+  application:
+    name: API-GATEWAY
+  redis:
+    host: 101.200.190.58
+    port: 6379
+    password: 17851182
+    database: 0
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 101.200.190.58:8848                  #配置nacos地址
+        namespace: e95c430e-a3e1-4f10-babe-e59d16aafbec   #命名空间
+    gateway:
+      routes:
+        - id: api-admin
+          uri: lb://API-ADMIN
+          predicates:
+            - Path=/azure/admin/**
+          filters:
+            - StripPrefix=1  # 去掉请求前缀filter 1去掉一级也就是去掉azure
+            - Token=false    # 这里的token是自定义的过滤器，判断redis中是否有对应的token
+
+        - id: api-category
+          uri: lb://API-CATEGORY
+          predicates:
+            - Path=/azure/category/**
+          filters:
+            - StripPrefix=1
+            - Token=true
+
+        - id: api-users
+          uri: lb://API-USERS
+          predicates:
+            - Path=/azure/user/**
+          filters:
+            - StripPrefix=1
+            - Token=true
+
+        - id: api-videos
+          uri: lb://API-VIDEOS
+          predicates:
+            - Path=/azure/video/**
+          filters:
+            - StripPrefix=1
+            - Token=true
+
+      #跨域配置
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
