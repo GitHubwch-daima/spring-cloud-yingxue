@@ -42,6 +42,7 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         if (!StringUtils.equals(password, selectOne.getPassword())) {
             throw new RuntimeException("密码输入错误！");
         }
+        System.out.println("test");
         return selectOne;
     }
 }
